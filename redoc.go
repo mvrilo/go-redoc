@@ -94,8 +94,8 @@ func (r *Redoc) Handler() http.HandlerFunc {
 	}
 
 	path := r.Config.Path
-	if path == "" || path[len(path)-1] != '/' {
-		path = path + "/"
+	if path == "" {
+		path = "/"
 	}
 
 	return func(w http.ResponseWriter, req *http.Request) {

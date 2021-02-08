@@ -1,3 +1,10 @@
+# go-redoc
+
+`go-redoc` is an embeded OpenAPI/Swagger documentation for Go programs using [ReDoc](https://github.com/Redocly/redoc).
+
+## Usage
+
+```go
 package main
 
 import (
@@ -13,13 +20,13 @@ func main() {
 		Title:       "Example API",
 		Description: "Example API Description",
 		SpecURL:     addr + "openapi.json",
-		Path:        "/docs",
 	})
 
 	r := gin.New()
 	r.StaticFile("/openapi.json", "./openapi.json")
 	r.Use(ginredoc.New(doc))
 
-	println("Documentation served at", addr+"docs")
+	println("Server started at", addr)
 	panic(r.Run(":8000"))
 }
+```
