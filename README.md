@@ -1,6 +1,9 @@
 # go-redoc
 
-`go-redoc` is an embedded OpenAPI/Swagger documentation ui for Go using [ReDoc](https://github.com/Redocly/redoc).
+[![GoDoc](https://godoc.org/github.com/mvrilo/go-redoc?status.svg)](https://godoc.org/github.com/mvrilo/go-redoc)
+[![Go Report Card](https://goreportcard.com/badge/github.com/mvrilo/go-redoc?_=1)](https://goreportcard.com/report/github.com/mvrilo/go-redoc?_=1)
+
+`go-redoc` is an embedded OpenAPI documentation ui for Go using [ReDoc](https://github.com/Redocly/redoc), with middleware implementations for: `net/http`, `gin` and `echo`.
 
 ## Usage
 
@@ -18,7 +21,20 @@ doc := redoc.New(redoc.Config{
 })
 ```
 
-## With Gin
+- `net/http`
+
+```go
+import (
+	"net/http"
+	"github.com/mvrilo/go-redoc"
+)
+
+...
+
+http.ListenAndServe(address, doc.Handler())
+```
+
+- `gin`
 
 ```go
 import (
@@ -33,7 +49,7 @@ r := gin.New()
 r.Use(ginredoc.New(doc))
 ```
 
-## Usage with Echo
+- `echo`
 
 ```go
 import (
@@ -49,3 +65,8 @@ r.Use(echoredoc.New(doc))
 ```
 
 See [examples](/_examples)
+
+## Related projects
+
+- https://github.com/go-openapi/runtime/blob/master/middleware/redoc.go
+- https://github.com/holdatech/go-redoc-middleware

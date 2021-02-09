@@ -7,8 +7,6 @@ import (
 )
 
 func main() {
-	addr := "http://127.0.0.1:8000/"
-
 	doc := redoc.New(redoc.Config{
 		Title:       "Example API",
 		Description: "Example API Description",
@@ -20,6 +18,6 @@ func main() {
 	r := echo.New()
 	r.Use(echoredoc.New(doc))
 
-	println("Documentation served at", addr+"docs")
+	println("Documentation served at http://127.0.0.1:8000/docs")
 	panic(r.Start(":8000"))
 }
