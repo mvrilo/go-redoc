@@ -12,12 +12,12 @@ func main() {
 	doc := redoc.New(redoc.Config{
 		Title:       "Example API",
 		Description: "Example API Description",
-		SpecURL:     addr + "openapi.json",
-		Path:        "/docs",
+		SpecFile:    "./openapi.json",
+		SpecPath:    "/openapi.json",
+		DocsPath:    "/docs",
 	})
 
 	r := gin.New()
-	r.StaticFile("/openapi.json", "./openapi.json")
 	r.Use(ginredoc.New(doc))
 
 	println("Documentation served at", addr+"docs")

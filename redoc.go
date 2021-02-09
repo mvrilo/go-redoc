@@ -2,6 +2,7 @@ package redoc
 
 import (
 	"bytes"
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -11,39 +12,25 @@ import (
 	"github.com/rakyll/statik/fs"
 )
 
-const indexTemplate = `<!doctype html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>{{ .title }}</title>
-  <meta name="description" content="{{ .description }}">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-  body {
-	margin: 0;
-	padding: 0;
-  }
-  </style>
-</head>
-<body>
-  <div id="main"></div>
-  <script>{{ .body }}</script>
-  <script>Redoc.init("{{ .url }}", {}, document.getElementById("main"))</script>
-</body>
-</html>`
+// ErrSpecNotFound error for when spec file not found
+var ErrSpecNotFound = errors.New("spec not found")
 
+// Config is Redoc configuration for the js and html
 type Config struct {
-	Path        string
-	SpecURL     string
+	DocsPath    string
+	SpecPath    string
+	SpecFile    string
 	Title       string
 	Description string
 }
 
+// Redoc contains configuration and the filesystem for the assets
 type Redoc struct {
 	fs     http.FileSystem
 	Config *Config
 }
 
+// New takes a Config and initializes a Redoc
 func New(config Config) *Redoc {
 	filesystem, err := fs.New()
 	if err != nil {
@@ -56,28 +43,37 @@ func New(config Config) *Redoc {
 	}
 }
 
-func (r *Redoc) Body() ([]byte, error) {
-	body, err := r.fs.Open("/redoc.standalone.js")
+func (r *Redoc) open(file string) ([]byte, error) {
+	f, err := r.fs.Open(file)
 	if err != nil {
 		return nil, err
 	}
-	defer body.Close()
+	defer f.Close()
+	return ioutil.ReadAll(f)
+}
+
+// Body returns the final html with the js in the body
+func (r *Redoc) Body() ([]byte, error) {
+	html, err := r.open("/index.html")
+	if err != nil {
+		return nil, err
+	}
+
+	js, err := r.open("/redoc.standalone.js")
+	if err != nil {
+		return nil, err
+	}
 
 	buf := bytes.NewBuffer(nil)
-	tpl, err := template.New("redoc").Parse(indexTemplate)
-	if err != nil {
-		return nil, err
-	}
-
-	data, err := ioutil.ReadAll(body)
+	tpl, err := template.New("redoc").Parse(string(html))
 	if err != nil {
 		return nil, err
 	}
 
 	err = tpl.Execute(buf, map[string]string{
-		"body":        string(data),
+		"body":        string(js),
 		"title":       r.Config.Title,
-		"url":         r.Config.SpecURL,
+		"url":         r.Config.SpecPath,
 		"description": r.Config.Description,
 	})
 	if err != nil {
@@ -87,22 +83,50 @@ func (r *Redoc) Body() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+// Handler sets some defaults and returns a HandlerFunc
 func (r *Redoc) Handler() http.HandlerFunc {
 	data, err := r.Body()
 	if err != nil {
 		panic(err)
 	}
 
-	path := r.Config.Path
-	if path == "" {
-		path = "/"
+	specFile := r.Config.SpecFile
+	if specFile == "" {
+		panic(ErrSpecNotFound)
+	}
+
+	specPath := r.Config.SpecPath
+	if specPath == "" {
+		specPath = "./openapi.json"
+	}
+
+	docsPath := r.Config.DocsPath
+	if docsPath == "" {
+		docsPath = "/"
+	}
+
+	spec, err := ioutil.ReadFile(specFile)
+	if err != nil {
+		panic(err)
 	}
 
 	return func(w http.ResponseWriter, req *http.Request) {
 		method := strings.ToLower(req.Method)
-		if req.URL.Path == path && (method == "get" || method == "head") {
+
+		if method != "get" && method != "head" {
+			return
+		}
+
+		switch req.URL.Path {
+		case docsPath:
 			w.WriteHeader(200)
+			w.Header().Set("content-type", "text/html")
 			w.Write(data)
+		case specPath:
+			w.WriteHeader(200)
+			w.Header().Set("content-type", "application/json")
+			w.Write(spec)
+		default:
 		}
 	}
 }
