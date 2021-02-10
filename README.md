@@ -12,13 +12,13 @@ import "github.com/mvrilo/go-redoc"
 
 ...
 
-doc := redoc.New(redoc.Config{
+doc := redoc.Redoc{
     Title:       "Example API",
     Description: "Example API Description",
     SpecFile:    "./openapi.json",
     SpecPath:    "/openapi.json",
     DocsPath:    "/docs",
-})
+}
 ```
 
 - `net/http`

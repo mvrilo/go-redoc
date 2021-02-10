@@ -7,13 +7,13 @@ import (
 )
 
 func main() {
-	doc := redoc.New(redoc.Config{
+	doc := redoc.Redoc{
 		Title:       "Example API",
 		Description: "Example API Description",
 		SpecFile:    "./openapi.json",
 		SpecPath:    "/openapi.json",
 		DocsPath:    "/docs",
-	})
+	}
 
 	r := echo.New()
 	r.Use(echoredoc.New(doc))

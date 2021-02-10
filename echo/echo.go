@@ -5,7 +5,7 @@ import (
 	"github.com/mvrilo/go-redoc"
 )
 
-func New(doc *redoc.Redoc) echo.MiddlewareFunc {
+func New(doc redoc.Redoc) echo.MiddlewareFunc {
 	handle := doc.Handler()
 
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
