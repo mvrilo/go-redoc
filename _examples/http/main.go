@@ -14,6 +14,12 @@ func main() {
 		SpecPath:    "/openapi.json",
 		DocsPath:    "/docs",
 	}
+
+	// mux := http.ServeMux{}
+	// handler := doc.Handler()
+	// mux.Handle("/docs", handler)
+	// mux.Handle("/openapi.json", handler)
+
 	println("Documentation served at http://127.0.0.1:8000/docs")
 	panic(http.ListenAndServe(":8000", doc.Handler()))
 }
