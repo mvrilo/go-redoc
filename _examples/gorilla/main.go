@@ -12,7 +12,7 @@ func main() {
 		Title:       "Example API",
 		Description: "Example API Description",
 		SpecFile:    "./openapi.json",
-		SpecPath:    "/openapi.json",
+		SpecPath:    "/docs/openapi.json",
 	}
 
 	r := mux.NewRouter()
