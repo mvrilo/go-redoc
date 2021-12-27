@@ -32,7 +32,7 @@ var HTML string
 var JavaScript string
 
 // Body returns the final html with the js in the body
-func (r *Redoc) Body() ([]byte, error) {
+func (r Redoc) Body() ([]byte, error) {
 	buf := bytes.NewBuffer(nil)
 	tpl, err := template.New("redoc").Parse(HTML)
 	if err != nil {
@@ -52,7 +52,7 @@ func (r *Redoc) Body() ([]byte, error) {
 }
 
 // Handler sets some defaults and returns a HandlerFunc
-func (r *Redoc) Handler() http.HandlerFunc {
+func (r Redoc) Handler() http.HandlerFunc {
 	data, err := r.Body()
 	if err != nil {
 		panic(err)
