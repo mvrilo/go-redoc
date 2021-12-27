@@ -32,15 +32,15 @@ var HTML string
 var JavaScript string
 
 // Body returns the final html with the js in the body
-func (r Redoc) Body() ([]byte, error) {
+func (r *Redoc) Body() ([]byte, error) {
 	buf := bytes.NewBuffer(nil)
-	tpl, err := template.New("redoc").Parse(string(HTML))
+	tpl, err := template.New("redoc").Parse(HTML)
 	if err != nil {
 		return nil, err
 	}
 
 	if err = tpl.Execute(buf, map[string]string{
-		"body":        string(JavaScript),
+		"body":        JavaScript,
 		"title":       r.Title,
 		"url":         r.SpecPath,
 		"description": r.Description,
@@ -52,7 +52,7 @@ func (r Redoc) Body() ([]byte, error) {
 }
 
 // Handler sets some defaults and returns a HandlerFunc
-func (r Redoc) Handler() http.HandlerFunc {
+func (r *Redoc) Handler() http.HandlerFunc {
 	data, err := r.Body()
 	if err != nil {
 		panic(err)
@@ -65,12 +65,7 @@ func (r Redoc) Handler() http.HandlerFunc {
 
 	specPath := r.SpecPath
 	if specPath == "" {
-		specPath = "./openapi.json"
-	}
-
-	docsPath := r.DocsPath
-	if docsPath == "" {
-		docsPath = "/"
+		specPath = "/openapi.json"
 	}
 
 	spec, err := ioutil.ReadFile(specFile)
@@ -78,23 +73,24 @@ func (r Redoc) Handler() http.HandlerFunc {
 		panic(err)
 	}
 
+	docsPath := r.DocsPath
 	return func(w http.ResponseWriter, req *http.Request) {
 		method := strings.ToLower(req.Method)
-
 		if method != "get" && method != "head" {
 			return
 		}
 
-		switch req.URL.Path {
-		case docsPath:
-			w.WriteHeader(200)
-			w.Header().Set("content-type", "text/html")
-			w.Write(data)
-		case specPath:
+		if strings.HasSuffix(req.URL.Path, r.SpecPath) {
 			w.WriteHeader(200)
 			w.Header().Set("content-type", "application/json")
 			w.Write(spec)
-		default:
+			return
+		}
+
+		if docsPath == "" || docsPath == req.URL.Path {
+			w.WriteHeader(200)
+			w.Header().Set("content-type", "text/html")
+			w.Write(data)
 		}
 	}
 }
