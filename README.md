@@ -17,8 +17,8 @@ import "github.com/mvrilo/go-redoc"
 doc := redoc.Redoc{
     Title:       "Example API",
     Description: "Example API Description",
-    SpecFile:    "./openapi.json",
-    SpecPath:    "/openapi.json",
+    SpecFile:    "./openapi.json", // "./openapi.yaml"
+    SpecPath:    "/openapi.json",  // "/openapi.yaml"
     DocsPath:    "/docs",
 }
 ```
