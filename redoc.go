@@ -2,13 +2,12 @@ package redoc
 
 import (
 	"bytes"
+	"embed"
 	"errors"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"text/template"
-
-	_ "embed"
 )
 
 // ErrSpecNotFound error for when spec file not found
@@ -19,15 +18,18 @@ type Redoc struct {
 	DocsPath    string
 	SpecPath    string
 	SpecFile    string
+	SpecFS      *embed.FS
 	Title       string
 	Description string
 }
 
 // HTML represents the redoc index.html page
+//
 //go:embed assets/index.html
 var HTML string
 
 // JavaScript represents the redoc standalone javascript
+//
 //go:embed assets/redoc.standalone.js
 var JavaScript string
 
@@ -63,14 +65,21 @@ func (r Redoc) Handler() http.HandlerFunc {
 		panic(ErrSpecNotFound)
 	}
 
-	specPath := r.SpecPath
-	if specPath == "" {
-		specPath = "/openapi.json"
+	if r.SpecPath == "" {
+		r.SpecPath = "/openapi.json"
 	}
 
-	spec, err := ioutil.ReadFile(specFile)
-	if err != nil {
-		panic(err)
+	var spec []byte
+	if r.SpecFS == nil {
+		spec, err = ioutil.ReadFile(specFile)
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		spec, err = r.SpecFS.ReadFile(specFile)
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	docsPath := r.DocsPath
@@ -83,14 +92,14 @@ func (r Redoc) Handler() http.HandlerFunc {
 		if strings.HasSuffix(req.URL.Path, r.SpecPath) {
 			w.WriteHeader(200)
 			w.Header().Set("content-type", "application/json")
-			w.Write(spec)
+			_, _ = w.Write(spec)
 			return
 		}
 
 		if docsPath == "" || docsPath == req.URL.Path {
 			w.WriteHeader(200)
 			w.Header().Set("content-type", "text/html")
-			w.Write(data)
+			_, _ = w.Write(data)
 		}
 	}
 }
