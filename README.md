@@ -7,6 +7,8 @@
 
 The template is based on the ReDoc's [bundle template](https://github.com/ReDocly/redoc/blob/master/cli/template.hbs) with the script already placed in the html instead of depending on a CDN.
 
+This package does not generate openapi spec file. Check [this example](_examples/gen) for using code generation with swag.
+
 ## Usage
 
 ```go
