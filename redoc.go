@@ -89,17 +89,18 @@ func (r Redoc) Handler() http.HandlerFunc {
 			return
 		}
 
+		header := w.Header()
 		if strings.HasSuffix(req.URL.Path, r.SpecPath) {
-			w.WriteHeader(200)
-			w.Header().Set("content-type", "application/json")
+			header.Set("Content-Type", "application/json")
 			_, _ = w.Write(spec)
+			w.WriteHeader(200)
 			return
 		}
 
 		if docsPath == "" || docsPath == req.URL.Path {
-			w.WriteHeader(200)
-			w.Header().Set("content-type", "text/html")
+			header.Set("Content-Type", "text/html")
 			_, _ = w.Write(data)
+			w.WriteHeader(200)
 		}
 	}
 }
