@@ -107,18 +107,29 @@ func (r Redoc) Handler() http.HandlerFunc {
 			header.Set("Content-Type", "text/html")
 			_, _ = w.Write(data)
 			w.WriteHeader(200)
+
+			return
 		}
 
-		// load sub spec
-		p := filepath.Join(r.SpecDir, filepath.FromSlash(req.URL.Path))
-		subSpec, err := ioutil.ReadFile(p)
-		header.Set("Content-Type", "application/json")
+		// load spec files
+		ext := filepath.Ext(req.URL.Path)
+		if ext == ".yaml" || ext == ".json" {
+			header.Set("Content-Type", "application/json")
+			p := filepath.Join(r.SpecDir, filepath.FromSlash(req.URL.Path))
+			subSpec, err := ioutil.ReadFile(p)
 
-		if err != nil {
-			w.WriteHeader(404)
-		} else {
+			if err != nil {
+				_, _ = w.Write([]byte("file not found."))
+				w.WriteHeader(404)
+
+				return
+			}
+
 			_, _ = w.Write(subSpec)
 			w.WriteHeader(200)
+
+			return
 		}
+
 	}
 }
