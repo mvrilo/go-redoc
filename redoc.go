@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io/ioutil"
 	"net/http"
+	"path/filepath"
 	"strings"
 	"text/template"
 )
@@ -18,6 +19,7 @@ type Redoc struct {
 	DocsPath    string
 	SpecPath    string
 	SpecFile    string
+	SpecDir     string
 	SpecFS      *embed.FS
 	Title       string
 	Description string
@@ -69,6 +71,10 @@ func (r Redoc) Handler() http.HandlerFunc {
 		r.SpecPath = "/openapi.json"
 	}
 
+	if r.SpecDir == "" {
+		r.SpecDir = "components"
+	}
+
 	var spec []byte
 	if r.SpecFS == nil {
 		spec, err = ioutil.ReadFile(specFile)
@@ -101,6 +107,29 @@ func (r Redoc) Handler() http.HandlerFunc {
 			header.Set("Content-Type", "text/html")
 			_, _ = w.Write(data)
 			w.WriteHeader(200)
+
+			return
 		}
+
+		// load spec files
+		ext := filepath.Ext(req.URL.Path)
+		if ext == ".yaml" || ext == ".json" {
+			header.Set("Content-Type", "application/json")
+			p := filepath.Join(r.SpecDir, filepath.FromSlash(req.URL.Path))
+			subSpec, err := ioutil.ReadFile(p)
+
+			if err != nil {
+				_, _ = w.Write([]byte("file not found."))
+				w.WriteHeader(404)
+
+				return
+			}
+
+			_, _ = w.Write(subSpec)
+			w.WriteHeader(200)
+
+			return
+		}
+
 	}
 }

@@ -5,6 +5,8 @@
   <title>{{ .title }}</title>
   <meta name="description" content="{{ .description }}">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700|Roboto:300,400,700" rel="stylesheet">
+
   <style>
   body {
 	margin: 0;
@@ -13,8 +15,7 @@
   </style>
 </head>
 <body>
-  <div id="main"></div>
-  <script>{{ .body }}</script>
-  <script>Redoc.init("{{ .url }}", {}, document.getElementById("main"))</script>
+  <redoc spec-url="{{ .url }}"></redoc>
+  <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"> </script>
 </body>
 </html>
