@@ -6,7 +6,7 @@ jobs:
   lint:
     strategy:
       matrix:
-        go: ['1.16','1.21']
+        go: ['1.17','1.21']
         os: ['ubuntu-latest']
     name: lint
     runs-on: ${{ matrix.os }}
@@ -19,7 +19,7 @@ jobs:
   test:
     strategy:
       matrix:
-        go: ['1.16','1.21']
+        go: ['1.17','1.21']
         os: ['ubuntu-latest']
     name: test
     runs-on: ${{ matrix.os }}
