@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"embed"
 	"errors"
-	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 	"text/template"
 )
@@ -71,7 +71,7 @@ func (r Redoc) Handler() http.HandlerFunc {
 
 	var spec []byte
 	if r.SpecFS == nil {
-		spec, err = ioutil.ReadFile(specFile)
+		spec, err = os.ReadFile(specFile)
 		if err != nil {
 			panic(err)
 		}
@@ -93,14 +93,14 @@ func (r Redoc) Handler() http.HandlerFunc {
 		if strings.HasSuffix(req.URL.Path, r.SpecPath) {
 			header.Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
-			w.Write(spec)
+			_, _ = w.Write(spec)
 			return
 		}
 
 		if docsPath == "" || docsPath == req.URL.Path {
 			header.Set("Content-Type", "text/html")
 			w.WriteHeader(http.StatusOK)
-			w.Write(data)
+			_, _ = w.Write(data)
 		}
 	}
 }
