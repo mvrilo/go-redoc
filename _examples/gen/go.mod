@@ -2,6 +2,8 @@ module github.com/mvrilo/go-redoc/_examples/gen
 
 go 1.21.5
 
+toolchain go1.22.2
+
 replace github.com/mvrilo/go-redoc => ../../
 
 require (

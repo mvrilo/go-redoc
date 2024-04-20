@@ -2,12 +2,15 @@ package redoc
 
 import (
 	"bytes"
-	"embed"
 	"errors"
+	"io"
+	"io/fs"
 	"net/http"
 	"os"
 	"strings"
 	"text/template"
+
+	_ "embed"
 )
 
 // ErrSpecNotFound error for when spec file not found
@@ -15,10 +18,12 @@ var ErrSpecNotFound = errors.New("spec not found")
 
 // Redoc configuration
 type Redoc struct {
-	DocsPath    string
-	SpecPath    string
-	SpecFile    string
-	SpecFS      *embed.FS
+	DocsPath string
+	SpecPath string
+
+	SpecFile string
+	SpecFS   fs.FS
+
 	Title       string
 	Description string
 }
@@ -53,15 +58,8 @@ func (r Redoc) Body() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// Handler sets some defaults and returns a HandlerFunc
-func (r Redoc) Handler() http.HandlerFunc {
-	data, err := r.Body()
-	if err != nil {
-		panic(err)
-	}
-
-	specFile := r.SpecFile
-	if specFile == "" {
+func (r Redoc) getDocAndSpec() ([]byte, []byte) {
+	if r.SpecFile == "" {
 		panic(ErrSpecNotFound)
 	}
 
@@ -69,20 +67,35 @@ func (r Redoc) Handler() http.HandlerFunc {
 		r.SpecPath = "/openapi.json"
 	}
 
-	var spec []byte
-	if r.SpecFS == nil {
-		spec, err = os.ReadFile(specFile)
-		if err != nil {
-			panic(err)
-		}
+	var file fs.File
+	var err error
+
+	if r.SpecFS != nil {
+		file, err = r.SpecFS.Open(r.SpecFile)
 	} else {
-		spec, err = r.SpecFS.ReadFile(specFile)
-		if err != nil {
-			panic(err)
-		}
+		file, err = os.Open(r.SpecFile)
+	}
+	if err != nil {
+		panic(err)
 	}
 
-	docsPath := r.DocsPath
+	spec, err := io.ReadAll(file)
+	if err != nil {
+		panic(err)
+	}
+
+	data, err := r.Body()
+	if err != nil {
+		panic(err)
+	}
+
+	return data, spec
+}
+
+// Handler sets some defaults and returns a HandlerFunc
+func (r Redoc) Handler() http.HandlerFunc {
+	doc, spec := r.getDocAndSpec()
+
 	return func(w http.ResponseWriter, req *http.Request) {
 		method := strings.ToLower(req.Method)
 		if method != "get" && method != "head" {
@@ -97,10 +110,10 @@ func (r Redoc) Handler() http.HandlerFunc {
 			return
 		}
 
-		if docsPath == "" || docsPath == req.URL.Path {
+		if r.DocsPath == "" || r.DocsPath == req.URL.Path {
 			header.Set("Content-Type", "text/html")
 			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write(data)
+			_, _ = w.Write(doc)
 		}
 	}
 }

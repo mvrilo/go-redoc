@@ -1,6 +1,6 @@
 module github.com/mvrilo/go-redoc/_examples/fiber
 
-go 1.21.5
+go 1.17
 
 replace github.com/mvrilo/go-redoc => ../../
 

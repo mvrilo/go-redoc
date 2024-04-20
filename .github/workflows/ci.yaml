@@ -12,7 +12,7 @@ jobs:
   lint:
     strategy:
       matrix:
-        go: ['1.17','1.21']
+        go: ['1.17','1.22']
         os: ['ubuntu-latest']
     name: lint
     runs-on: ${{ matrix.os }}
@@ -21,11 +21,12 @@ jobs:
         with:
           go-version: ${{ matrix.go }}
       - uses: actions/checkout@v3
+      - run: make lint
       - uses: golangci/golangci-lint-action@v3
   test:
     strategy:
       matrix:
-        go: ['1.17','1.21']
+        go: ['1.17','1.22']
         os: ['ubuntu-latest']
     name: test
     runs-on: ${{ matrix.os }}
@@ -34,4 +35,30 @@ jobs:
         with:
           go-version: ${{ matrix.go }}
       - uses: actions/checkout@v3
-      - run: go test -race ./...
+      - run: make test
+  middlewares:
+    strategy:
+      matrix:
+        go: ['1.17','1.22']
+        os: ['ubuntu-latest']
+    name: middlewares
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/setup-go@v3
+        with:
+          go-version: ${{ matrix.go }}
+      - uses: actions/checkout@v3
+      - run: make middlewares
+  examples:
+    strategy:
+      matrix:
+        go: ['1.17','1.22']
+        os: ['ubuntu-latest']
+    name: examples
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/setup-go@v3
+        with:
+          go-version: ${{ matrix.go }}
+      - uses: actions/checkout@v3
+      - run: make examples
