@@ -1,7 +1,7 @@
-.PHONY: all lint test deps
-
 REDOC_PATH=assets/redoc.standalone.js
-REDOC_URL=https://cdn.jsdelivr.net/npm/redoc/bundles/redoc.standalone.js
+REDOC_URL=https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js
+
+.PHONY: all lint test deps $(REDOC_PATH)
 
 all: $(REDOC_PATH) lint test
 
