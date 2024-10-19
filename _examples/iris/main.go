@@ -1,8 +1,8 @@
 package iris
 
 import (
+	"github.com/kataras/iris/v12"
 	"github.com/mvrilo/go-redoc"
-	"github.com/mvrilo/go-redoc/iris"
 	irisdoc "github.com/mvrilo/go-redoc/iris"
 )
 
@@ -15,9 +15,8 @@ func main() {
 		DocsPath:    "/docs",
 	}
 
-	r := iris.New()
-	r.Use(irisdoc.New(doc))
-
+	app := iris.New()
+	app.Use(irisdoc.New(doc))
 	println("Documentation served at http://127.0.0.1:8000/docs")
-	panic(r.Listen(":8000"))
+	panic(app.Listen(":8000"))
 }
