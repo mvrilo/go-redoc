@@ -84,3 +84,37 @@ r.Use(fiberredoc.New(doc))
 ```
 
 See [examples](/_examples)
+
+
+## Configuration Options
+
+
+```go
+r := redoc.Redoc{
+		SpecFile: "testdata/spec.json",
+		SpecFS:   &spec,
+		SpecPath: "/openapi.json", // "/openapi.yaml"
+		Title:    "Test API",
+		Description: "Meta Description"
+        Options: `{` +
+        `"disableSearch": true,` +
+        `"theme": { ` +
+        `"colors": {"primary":{"main":"#297b21"}},` +
+        `"headings": {"font_weight":"800"},` +
+        `"sidebar": { "backgroundColor": "#cae6c6" }` +
+        `}` +
+        `}`,
+	}
+```
+
+`Title` : The head title of your html page - Shown on search engine.
+
+`Description` : The head meta description of your html page - Shown on search engine.
+
+`Options`: redoc option see [Redoc Configuration Documentation](https://github.com/Redocly/redoc/blob/main/docs/config.md)
+
+`SpecFile`: file path to your openapi/swagger file from your project.
+
+`SpecPath`: url path to call your openapi/swagger file from redoc documentation. Must be aligned with your web server configuration.
+
+`DocsPath` : url path to call your generated API documentation. Must be aligned with your web server configuration.

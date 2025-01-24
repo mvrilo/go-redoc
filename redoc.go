@@ -3,7 +3,9 @@ package redoc
 import (
 	"bytes"
 	"embed"
+	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -21,6 +23,7 @@ type Redoc struct {
 	SpecFS      *embed.FS
 	Title       string
 	Description string
+	Options     string
 }
 
 // HTML represents the redoc index.html page
@@ -41,11 +44,21 @@ func (r Redoc) Body() ([]byte, error) {
 		return nil, err
 	}
 
+	if r.Options == "" {
+		r.Options = "{}"
+	} else if !json.Valid([]byte(r.Options)) {
+		// Secure rendering in case of bad json injected (avoid the white page)
+
+		r.Options = "{}"
+		log.Printf("Invalid json options provided, using default options instead.")
+	}
+
 	if err = tpl.Execute(buf, map[string]string{
 		"body":        JavaScript,
 		"title":       r.Title,
 		"url":         r.SpecPath,
 		"description": r.Description,
+		"options":     r.Options,
 	}); err != nil {
 		return nil, err
 	}
