@@ -91,20 +91,19 @@ See [examples](/_examples)
 
 ```go
 r := redoc.Redoc{
-		SpecFile: "testdata/spec.json",
-		SpecFS:   &spec,
-		SpecPath: "/openapi.json", // "/openapi.yaml"
-		Title:    "Test API",
-		Description: "Meta Description"
-        Options: `{` +
-        `"disableSearch": true,` +
-        `"theme": { ` +
-        `"colors": {"primary":{"main":"#297b21"}},` +
-        `"headings": {"font_weight":"800"},` +
-        `"sidebar": { "backgroundColor": "#cae6c6" }` +
-        `}` +
-        `}`,
-	}
+    SpecFile: "testdata/spec.json", 
+	SpecFS:   &spec, 
+	SpecPath: "/openapi.json", // "/openapi.yaml" Title:    "Test API",
+	Description: "Meta Description"
+	Options: map[string]any{
+		"disableSearch": true, 
+		"theme": map[string]any{
+			"colors":     map[string]any{"primary": map[string]any{"main": "#297b21"}}, 
+			"typography": map[string]any{"headings": map[string]any{"fontWeight": "600"}}
+			"sidebar":    map[string]any{"backgroundColor": "#cae6c6"},
+		},
+	},
+}
 ```
 
 `Title` : The head title of your html page - Shown on search engine.

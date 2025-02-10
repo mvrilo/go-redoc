@@ -23,7 +23,7 @@ type Redoc struct {
 	SpecFS      *embed.FS
 	Title       string
 	Description string
-	Options     string
+	Options     map[string]any
 }
 
 // HTML represents the redoc index.html page
@@ -44,12 +44,12 @@ func (r Redoc) Body() ([]byte, error) {
 		return nil, err
 	}
 
-	if r.Options == "" {
-		r.Options = "{}"
-	} else if !json.Valid([]byte(r.Options)) {
-		// Secure rendering in case of bad json injected (avoid the white page)
+	var optionsString = "{}"
 
-		r.Options = "{}"
+	var optionsByte, errM = json.Marshal(r.Options)
+	if errM == nil {
+		optionsString = string(optionsByte)
+	} else {
 		log.Printf("Invalid json options provided, using default options instead.")
 	}
 
@@ -58,7 +58,7 @@ func (r Redoc) Body() ([]byte, error) {
 		"title":       r.Title,
 		"url":         r.SpecPath,
 		"description": r.Description,
-		"options":     r.Options,
+		"options":     optionsString,
 	}); err != nil {
 		return nil, err
 	}
