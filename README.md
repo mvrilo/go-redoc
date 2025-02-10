@@ -102,3 +102,36 @@ app.Use(irisdoc.New(doc))
 
 
 See [examples](/_examples)
+
+
+## Configuration Options
+
+
+```go
+r := redoc.Redoc{
+    SpecFile: "testdata/spec.json", 
+	SpecFS:   &spec, 
+	SpecPath: "/openapi.json", // "/openapi.yaml" Title:    "Test API",
+	Description: "Meta Description"
+	Options: map[string]any{
+		"disableSearch": true, 
+		"theme": map[string]any{
+			"colors":     map[string]any{"primary": map[string]any{"main": "#297b21"}}, 
+			"typography": map[string]any{"headings": map[string]any{"fontWeight": "600"}}
+			"sidebar":    map[string]any{"backgroundColor": "#cae6c6"},
+		},
+	},
+}
+```
+
+`Title` : The head title of your html page - Shown on search engine.
+
+`Description` : The head meta description of your html page - Shown on search engine.
+
+`Options`: redoc option see [Redoc Configuration Documentation](https://github.com/Redocly/redoc/blob/main/docs/config.md)
+
+`SpecFile`: file path to your openapi/swagger file from your project.
+
+`SpecPath`: url path to call your openapi/swagger file from redoc documentation. Must be aligned with your web server configuration.
+
+`DocsPath` : url path to call your generated API documentation. Must be aligned with your web server configuration.

@@ -15,6 +15,6 @@
 <body>
   <div id="main"></div>
   <script>{{ .body }}</script>
-  <script>Redoc.init("{{ .url }}", {}, document.getElementById("main"))</script>
+  <script>Redoc.init("{{ .url }}", {{ .options }}, document.getElementById("main"))</script>
 </body>
 </html>
