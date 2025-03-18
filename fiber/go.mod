@@ -1,6 +1,6 @@
 module github.com/mvrilo/go-redoc/fiber
 
-go 1.21.5
+go 1.17
 
 require (
 	github.com/gofiber/adaptor/v2 v2.2.1
