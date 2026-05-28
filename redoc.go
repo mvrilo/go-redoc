@@ -3,9 +3,12 @@ package redoc
 import (
 	"bytes"
 	"embed"
+	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 	"text/template"
 )
@@ -18,9 +21,11 @@ type Redoc struct {
 	DocsPath    string
 	SpecPath    string
 	SpecFile    string
+	SpecDir     string
 	SpecFS      *embed.FS
 	Title       string
 	Description string
+	Options     map[string]any
 }
 
 // HTML represents the redoc index.html page
@@ -41,11 +46,21 @@ func (r Redoc) Body() ([]byte, error) {
 		return nil, err
 	}
 
+	var optionsString = "{}"
+
+	var optionsByte, errM = json.Marshal(r.Options)
+	if errM == nil {
+		optionsString = string(optionsByte)
+	} else {
+		log.Printf("Invalid json options provided, using default options instead.")
+	}
+
 	if err = tpl.Execute(buf, map[string]string{
 		"body":        JavaScript,
 		"title":       r.Title,
 		"url":         r.SpecPath,
 		"description": r.Description,
+		"options":     optionsString,
 	}); err != nil {
 		return nil, err
 	}
@@ -67,6 +82,10 @@ func (r Redoc) Handler() http.HandlerFunc {
 
 	if r.SpecPath == "" {
 		r.SpecPath = "/openapi.json"
+	}
+
+	if r.SpecDir == "" {
+		r.SpecDir = "components"
 	}
 
 	var spec []byte
@@ -101,6 +120,26 @@ func (r Redoc) Handler() http.HandlerFunc {
 			header.Set("Content-Type", "text/html")
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write(data)
+			return
 		}
+
+		// load spec files
+		ext := filepath.Ext(req.URL.Path)
+		if ext == ".yaml" || ext == ".json" {
+			header.Set("Content-Type", "application/json")
+			p := filepath.Join(r.SpecDir, filepath.FromSlash(req.URL.Path))
+			subSpec, err := os.ReadFile(p)
+
+			if err != nil {
+				w.WriteHeader(http.StatusNotFound)
+				_, _ = w.Write([]byte("file not found."))
+				return
+			}
+
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write(subSpec)
+			return
+		}
+
 	}
 }
